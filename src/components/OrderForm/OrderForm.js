@@ -3,12 +3,24 @@ import { useState } from "react";
 function OrderForm({ addNewOrder} ) {
   const [name, setName] = useState("");
   const [ingredients, setIngredients] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (!name || ingredients.length === 0) {
+      setErrorMessage("Please enter a name and select at least one ingredient.");
+
+      setTimeout(() => {
+        setErrorMessage("");
+      }, 1500);
+  
+    } else {
     const newOrder = { name, ingredients };
     addNewOrder(newOrder);
     clearInputs();
+    setErrorMessage("");
+    }
   }
 
   function clearInputs() {
@@ -30,12 +42,14 @@ function OrderForm({ addNewOrder} ) {
     "cilantro",
     "sour cream",
   ];
+  
   const ingredientButtons = possibleIngredients.map((ingredient) => {
     return (
       <button
         key={ingredient}
         name={ingredient}
         type="button"
+        className="ingredient-button"
         onClick={() => setIngredients([...ingredients, ingredient])}
       >
         {ingredient}
@@ -55,9 +69,10 @@ function OrderForm({ addNewOrder} ) {
 
       {ingredientButtons}
 
-      <p>Order: {ingredients.join(", ") || "Nothing selected"}</p>
+      <p className="order-text" >Order: {ingredients.join(", ") || "Nothing selected"}</p>
 
-      <button type="submit" disabled={!name || ingredients.length === 0}>Submit Order</button>
+      <button type="submit">Submit Order</button>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
     </form>
   );
