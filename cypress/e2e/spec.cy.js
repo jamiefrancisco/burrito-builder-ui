@@ -58,4 +58,22 @@ describe("Display and User Flow", () => {
 
     cy.get('.error-message').should('not.exist');
   });
+
+  it('allows the user to delete an order from the DOM', () => {
+    cy.intercept('DELETE', 'http://localhost:3001/api/v1/orders/1', {
+      statusCode: 204
+    }).as('deleteOrder');
+
+    cy.wait('@getOrders');
+
+    cy.get('.order').first().find('.delete-order').click();
+
+    cy.wait('@deleteOrder');
+
+    cy.get('.order').should('have.length', 1);
+    cy.get('.order').first().contains('Mr. Francisco');
+    cy.get('.order').first().contains('beans');
+    cy.get('.order').first().contains('hot sauce');
+
+  });
 });
