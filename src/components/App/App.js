@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { getOrders, postOrder } from "../../apiCalls";
+import { getOrders, postOrder, deleteOrder } from "../../apiCalls";
 import Orders from "../../components/Orders/Orders";
 import OrderForm from "../../components/OrderForm/OrderForm";
 
@@ -9,21 +9,34 @@ function App() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    getOrders()
-      .then(data => {
+    const fetchOrders = async () => {
+      try {
+        const data = await getOrders();
         setOrders(data.orders);
-      })
-      .catch((err) => console.error("Error fetching:", err));
+      } catch (err) {
+        console.error("Error fetching:", err);
+      }
+    };
+    fetchOrders();
   }, []);
-  
-  const addNewOrder = (newOrder) => {
-    postOrder(newOrder)
-      .then(addedOrder => {
-        setOrders([...orders, addedOrder]);
-      })
-      .catch((err) => console.error("Error posting new order:", err));
+
+  const addNewOrder = async (newOrder) => {
+    try {
+      const addedOrder = await postOrder(newOrder);
+      setOrders(prevOrders => [...prevOrders, addedOrder]);
+    } catch (err) {
+      console.error("Error posting new order:", err);
+    }
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      await deleteOrder(orderId);
+      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
+    } catch (err) {
+      console.error("Error deleting order:", err);
+    }
+  };
 
   return (
     <main className="App">
@@ -32,7 +45,7 @@ function App() {
         <OrderForm addNewOrder={addNewOrder} />
       </header>
 
-      <Orders orders={orders} />
+      <Orders orders={orders} handleDeleteOrder={handleDeleteOrder} />
     </main>
   );
 }
